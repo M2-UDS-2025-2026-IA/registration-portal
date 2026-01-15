@@ -44,6 +44,7 @@ function doPost(e) {
     const matricule = data.matricule.trim().toUpperCase();
     const email = data.email.trim().toLowerCase();
     const fullName = data.fullName.trim();
+    const githubUsername = data.githubUsername.trim();
     
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName(SHEET_NAME);
@@ -51,7 +52,7 @@ function doPost(e) {
     // Initialize sheet if needed
     if (!sheet) {
       sheet = ss.insertSheet(SHEET_NAME);
-      sheet.appendRow(["Timestamp", "Name", "Matricule", "Email", "Topic", "TeamNumber", "SubProject"]);
+      sheet.appendRow(["Timestamp", "Name", "Matricule", "Email", "GitHub Username", "Topic", "TeamNumber", "SubProject"]);
     }
     
     // ========== VALIDATION ==========
@@ -81,7 +82,7 @@ function doPost(e) {
     // 3. Count how many are already in this topic (to determine team number)
     let topicCount = 0;
     for (let i = 1; i < existingData.length; i++) {
-      if (existingData[i][4] === selectedTopic) {
+      if (existingData[i][5] === selectedTopic) {
         topicCount++;
       }
     }
@@ -98,7 +99,8 @@ function doPost(e) {
       new Date(), 
       fullName, 
       matricule, 
-      email, 
+      email,
+      githubUsername,
       selectedTopic, 
       teamNumber,
       subProject
@@ -148,9 +150,9 @@ function checkStudentStatus_(matricule) {
       return jsonResponse({
         registered: true,
         name: data[i][1],
-        topic: data[i][4],
-        team: data[i][5],
-        subProject: data[i][6]
+        topic: data[i][5],
+        team: data[i][6],
+        subProject: data[i][7]
       });
     }
   }
@@ -173,7 +175,7 @@ function calculateAvailability_() {
   GROUPS.forEach(g => counts[g] = 0);
   
   for (let i = 1; i < data.length; i++) {
-    const topic = data[i][4];
+    const topic = data[i][5];
     if (counts[topic] !== undefined) {
       counts[topic]++;
     }
