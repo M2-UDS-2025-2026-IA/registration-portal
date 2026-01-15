@@ -416,17 +416,31 @@
         try {
             const response = await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
 
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
             const result = await response.json();
+            console.log('Registration result:', result); // Debug log
 
             if (result.result === "success") {
+                // Build success message
+                const topic = result.topic || '';
+                const team = result.team || '';
+                const project = result.project || '';
+                
+                const successMsg = currentLang === 'en' 
+                    ? `You are in ${topic}, Team ${team}, assigned to: ${project}`
+                    : `Vous êtes dans ${topic}, Équipe ${team}, assigné(e) à: ${project}`;
+                
                 document.getElementById('registrationFormContainer').style.display = 'none';
                 document.getElementById('alreadyRegisteredView').style.display = 'block';
                 document.getElementById('registrationDetails').innerHTML = `
-                    <p class="h5">${result.message}</p>
+                    <p class="h5">${successMsg}</p>
                     <p class="mt-3">${translations[currentLang].furtherInstructions}</p>
                 `;
             } else {

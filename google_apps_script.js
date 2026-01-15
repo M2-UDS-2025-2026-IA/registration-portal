@@ -39,6 +39,12 @@ function doPost(e) {
   try {
     lock.waitLock(30000); // Wait 30s for lock (concurrency protection)
     
+    if (!e || !e.postData || !e.postData.contents) {
+      return jsonResponse({result: "error", message: "No request body received. Confirm the web app URL and method are correct."});
+    }
+
+    Logger.log("POST body: " + e.postData.contents);
+
     const data = JSON.parse(e.postData.contents);
     const selectedTopic = data.selectedTopic;
     const matricule = data.matricule.trim().toUpperCase();
@@ -109,10 +115,13 @@ function doPost(e) {
     // 5. Update Teams Sheet (optional tracking)
     updateTeamsSheet_(ss, selectedTopic, teamNumber);
     
-    return jsonResponse({
+    return ContentService.createTextOutput(JSON.stringify({
       result: "success", 
-      message: "Registered! You are in " + selectedTopic + ", Team " + teamNumber + ", assigned to: " + subProject
-    });
+      message: "Registered! You are in " + selectedTopic + ", Team " + teamNumber + ", assigned to: " + subProject,
+      topic: selectedTopic,
+      team: teamNumber,
+      project: subProject
+    })).setMimeType(ContentService.MimeType.JSON);
       
   } catch (err) {
     return jsonResponse({result: "error", message: err.toString()});
