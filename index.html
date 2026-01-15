@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M2 IA UDS 2025-2026 | Project Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .topic-card {
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 3px solid transparent;
+            border-radius: 15px;
+        }
+        .topic-card:hover:not(.disabled) {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .topic-card.selected {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .topic-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f8f9fa;
+        }
+        .topic-icon {
+            font-size: 3rem;
+        }
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .already-registered {
+            background: #d4edda;
+            border-radius: 15px;
+            padding: 30px;
+        }
+        #errorAlert {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="main-card p-4 p-md-5">
+                
+                <!-- Header -->
+                <div class="text-center mb-4">
+                    <h1 class="fw-bold">M2 IA - UDS 2025-2026</h1>
+                    <p class="lead text-muted">AI Project Registration Portal</p>
+                </div>
+
+                <!-- Status Check Section -->
+                <div class="card mb-4 border-0 bg-light">
+                    <div class="card-body">
+                        <p class="mb-2"><strong>Already registered?</strong> Check your assignment:</p>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="checkMatricule" placeholder="Enter your Matricule">
+                            <button class="btn btn-outline-secondary" type="button" id="checkStatusBtn">Check Status</button>
+                        </div>
+                        <div id="statusResult" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <!-- Error Alert -->
+                <div class="alert alert-danger" id="errorAlert" role="alert"></div>
+
+                <!-- Already Registered View (Hidden by default) -->
+                <div id="alreadyRegisteredView" class="already-registered text-center" style="display:none;">
+                    <h3>✅ You are already registered!</h3>
+                    <div id="registrationDetails" class="mt-3"></div>
+                </div>
+
+                <!-- Registration Form -->
+                <div id="registrationFormContainer">
+                    <div class="alert alert-info">
+                        <strong>⚖️ Balancing Rule:</strong> To ensure fair group sizes, some topics may be temporarily locked until others catch up.
+                    </div>
+
+                    <form id="registrationForm">
+                        <!-- Student Details -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <strong>Step 1:</strong> Your Details
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="fullName" id="fullName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Matricule <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="matricule" id="matricule" required 
+                                               placeholder="e.g., 20A001">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Email Address <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" name="email" id="email" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Topic Selection -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <strong>Step 2:</strong> Choose Your Research Theme
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-3" id="loadingText">
+                                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                                    Loading topic availability...
+                                </p>
+                                
+                                <div class="row g-3" id="topicGrid"></div>
+                                <input type="hidden" name="selectedTopic" id="selectedTopicInput" required>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                                Register Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center mt-4 text-muted">
+                    <small>Once registered, you cannot change your topic. Choose wisely!</small>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // =============================================
+    // CONFIGURATION - UPDATE THIS URL AFTER DEPLOY
+    // =============================================
+    const APPS_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+    const topics = [
+        { id: "Group_01_Computer_Vision", title: "Computer Vision", icon: "👁️", desc: "Pothole Detection, Cocoa Counting, Disease Classification" },
+        { id: "Group_02_NLP", title: "NLP & Linguistics", icon: "🗣️", desc: "Pidgin Translation, Yemba Autocorrect, Dschang Chatbot" },
+        { id: "Group_03_Time_Series", title: "Time Series", icon: "📈", desc: "Market Forecasting, Electricity Prediction, Student Success" },
+        { id: "Group_04_Audio_Processing", title: "Audio & Speech", icon: "🎙️", desc: "Dialect Spotting, Logging Detection, Cameroonian ASR" },
+        { id: "Group_05_Agentic_AI", title: "Agentic AI", icon: "🤖", desc: "MoMo Agent, Penal Code Assistant, Tour Guide" },
+        { id: "Group_06_MLOps", title: "MLOps", icon: "⚙️", desc: "Feature Store, Experiment Tracker, Data Validator" }
+    ];
+
+    // =============================================
+    // LOAD AVAILABILITY FROM GOOGLE SHEETS
+    // =============================================
+    async function loadAvailability() {
+        try {
+            const response = await fetch(APPS_SCRIPT_URL);
+            const availability = await response.json();
+            renderTopics(availability);
+            document.getElementById('loadingText').style.display = 'none';
+        } catch (e) {
+            console.error("Error loading availability:", e);
+            document.getElementById('loadingText').innerHTML = 
+                '<span class="text-danger">Failed to load. Please refresh the page.</span>';
+        }
+    }
+
+    function renderTopics(availability) {
+        const grid = document.getElementById('topicGrid');
+        grid.innerHTML = '';
+
+        topics.forEach(t => {
+            const isAvailable = availability[t.id] !== false;
+            
+            const col = document.createElement('div');
+            col.className = 'col-md-4 col-sm-6';
+            
+            col.innerHTML = `
+                <div class="card h-100 topic-card ${isAvailable ? '' : 'disabled'}" 
+                     data-topic-id="${t.id}"
+                     onclick="${isAvailable ? `selectTopic('${t.id}', this)` : 'void(0)'}">
+                    <div class="card-body text-center position-relative">
+                        ${!isAvailable ? '<span class="badge bg-warning text-dark status-badge">Locked</span>' : ''}
+                        <div class="topic-icon mb-2">${t.icon}</div>
+                        <h5 class="card-title">${t.title}</h5>
+                        <p class="card-text small text-muted">${t.desc}</p>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(col);
+        });
+    }
+
+    function selectTopic(id, cardElement) {
+        document.querySelectorAll('.topic-card').forEach(c => c.classList.remove('selected'));
+        cardElement.classList.add('selected');
+        document.getElementById('selectedTopicInput').value = id;
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    // =============================================
+    // CHECK REGISTRATION STATUS
+    // =============================================
+    document.getElementById('checkStatusBtn').addEventListener('click', async function() {
+        const matricule = document.getElementById('checkMatricule').value.trim();
+        if (!matricule) {
+            alert("Please enter your Matricule.");
+            return;
+        }
+
+        const resultDiv = document.getElementById('statusResult');
+        resultDiv.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Checking...';
+
+        try {
+            const response = await fetch(`${APPS_SCRIPT_URL}?action=checkStatus&matricule=${encodeURIComponent(matricule)}`);
+            const data = await response.json();
+
+            if (data.registered) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>Found!</strong> ${data.name}<br>
+                        <strong>Topic:</strong> ${data.topic}<br>
+                        <strong>Team:</strong> ${data.team}<br>
+                        <strong>Project:</strong> ${data.subProject}
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `<div class="alert alert-secondary">Not registered yet. Please fill the form below.</div>`;
+            }
+        } catch (e) {
+            resultDiv.innerHTML = `<div class="alert alert-danger">Error checking status. Try again.</div>`;
+        }
+    });
+
+    // =============================================
+    // FORM SUBMISSION
+    // =============================================
+    document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const errorAlert = document.getElementById('errorAlert');
+        errorAlert.style.display = 'none';
+        
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Registering...';
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+
+        try {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.result === "success") {
+                // Show success view
+                document.getElementById('registrationFormContainer').style.display = 'none';
+                document.getElementById('alreadyRegisteredView').style.display = 'block';
+                document.getElementById('registrationDetails').innerHTML = `
+                    <p class="h5">${result.message}</p>
+                    <p class="mt-3">You will receive further instructions via email.</p>
+                `;
+            } else {
+                // Show error
+                errorAlert.textContent = result.message || "Registration failed. Please try again.";
+                errorAlert.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Register Now';
+            }
+        } catch (e) {
+            errorAlert.textContent = "Network error. Please check your connection and try again.";
+            errorAlert.style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = 'Register Now';
+        }
+    });
+
+    // Initialize
+    loadAvailability();
+</script>
+</body>
+</html>
