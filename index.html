@@ -19,6 +19,21 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
+        .lang-switcher {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+        .lang-btn {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-left: 5px;
+        }
+        .lang-btn.active {
+            background-color: #667eea;
+            color: white;
+        }
         .topic-card {
             transition: all 0.3s;
             cursor: pointer;
@@ -61,21 +76,27 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <div class="main-card p-4 p-md-5">
+            <div class="main-card p-4 p-md-5 position-relative">
                 
+                <!-- Language Switcher -->
+                <div class="lang-switcher">
+                    <button class="btn btn-outline-secondary btn-sm lang-btn active" onclick="setLanguage('en')">EN</button>
+                    <button class="btn btn-outline-secondary btn-sm lang-btn" onclick="setLanguage('fr')">FR</button>
+                </div>
+
                 <!-- Header -->
                 <div class="text-center mb-4">
                     <h1 class="fw-bold">M2 IA - UDS 2025-2026</h1>
-                    <p class="lead text-muted">AI Project Registration Portal</p>
+                    <p class="lead text-muted" data-i18n="subtitle">AI Project Registration Portal</p>
                 </div>
 
                 <!-- Status Check Section -->
                 <div class="card mb-4 border-0 bg-light">
                     <div class="card-body">
-                        <p class="mb-2"><strong>Already registered?</strong> Check your assignment:</p>
+                        <p class="mb-2"><strong data-i18n="alreadyRegistered">Already registered?</strong> <span data-i18n="checkAssignment">Check your assignment:</span></p>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="checkMatricule" placeholder="Enter your Matricule">
-                            <button class="btn btn-outline-secondary" type="button" id="checkStatusBtn">Check Status</button>
+                            <input type="text" class="form-control" id="checkMatricule" data-i18n-placeholder="enterMatricule">
+                            <button class="btn btn-outline-secondary" type="button" id="checkStatusBtn" data-i18n="checkStatus">Check Status</button>
                         </div>
                         <div id="statusResult" class="mt-3"></div>
                     </div>
@@ -86,36 +107,37 @@
 
                 <!-- Already Registered View (Hidden by default) -->
                 <div id="alreadyRegisteredView" class="already-registered text-center" style="display:none;">
-                    <h3>✅ You are already registered!</h3>
+                    <h3>✅ <span data-i18n="youAreRegistered">You are already registered!</span></h3>
                     <div id="registrationDetails" class="mt-3"></div>
                 </div>
 
                 <!-- Registration Form -->
                 <div id="registrationFormContainer">
                     <div class="alert alert-info">
-                        <strong>⚖️ Balancing Rule:</strong> To ensure fair group sizes, some topics may be temporarily locked until others catch up.
+                        <strong>⚖️ <span data-i18n="balancingRule">Balancing Rule:</span></strong> 
+                        <span data-i18n="balancingRuleDesc">To ensure fair group sizes, some topics may be temporarily locked until others catch up.</span>
                     </div>
 
                     <form id="registrationForm">
                         <!-- Student Details -->
                         <div class="card mb-4">
                             <div class="card-header bg-primary text-white">
-                                <strong>Step 1:</strong> Your Details
+                                <strong data-i18n="step1">Step 1:</strong> <span data-i18n="yourDetails">Your Details</span>
                             </div>
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                        <label class="form-label" data-i18n="fullName">Full Name</label> <span class="text-danger">*</span>
                                         <input type="text" class="form-control" name="fullName" id="fullName" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Matricule <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" name="matricule" id="matricule" required 
-                                               placeholder="e.g., 20A001">
+                                               placeholder="ex: 20A001">
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Email Address <span class="text-danger">*</span></label>
+                                    <label class="form-label" data-i18n="email">Email Address</label> <span class="text-danger">*</span>
                                     <input type="email" class="form-control" name="email" id="email" required>
                                 </div>
                             </div>
@@ -124,12 +146,12 @@
                         <!-- Topic Selection -->
                         <div class="card mb-4">
                             <div class="card-header bg-primary text-white">
-                                <strong>Step 2:</strong> Choose Your Research Theme
+                                <strong data-i18n="step2">Step 2:</strong> <span data-i18n="chooseTheme">Choose Your Research Theme</span>
                             </div>
                             <div class="card-body">
                                 <p class="text-muted mb-3" id="loadingText">
                                     <span class="spinner-border spinner-border-sm" role="status"></span>
-                                    Loading topic availability...
+                                    <span data-i18n="loadingTopics">Loading topic availability...</span>
                                 </p>
                                 
                                 <div class="row g-3" id="topicGrid"></div>
@@ -139,7 +161,7 @@
 
                         <!-- Submit -->
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled data-i18n="registerNow">
                                 Register Now
                             </button>
                         </div>
@@ -148,7 +170,7 @@
 
                 <!-- Footer -->
                 <div class="text-center mt-4 text-muted">
-                    <small>Once registered, you cannot change your topic. Choose wisely!</small>
+                    <small data-i18n="noChangeWarning">Once registered, you cannot change your topic. Choose wisely!</small>
                 </div>
 
             </div>
@@ -158,18 +180,128 @@
 
 <script>
     // =============================================
-    // CONFIGURATION - UPDATE THIS URL AFTER DEPLOY
+    // CONFIGURATION
     // =============================================
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwsjuyRcOLWz09pz7gI8C5tJi2cWGkt6kSkPkKESKMPN5VyGIBy1n3e317reGCIr4Yw/exec";
 
+    // =============================================
+    // TRANSLATIONS
+    // =============================================
+    const translations = {
+        en: {
+            subtitle: "AI Project Registration Portal",
+            alreadyRegistered: "Already registered?",
+            checkAssignment: "Check your assignment:",
+            enterMatricule: "Enter your Matricule",
+            checkStatus: "Check Status",
+            youAreRegistered: "You are already registered!",
+            balancingRule: "Balancing Rule:",
+            balancingRuleDesc: "To ensure fair group sizes, some topics may be temporarily locked until others catch up.",
+            step1: "Step 1:",
+            yourDetails: "Your Details",
+            fullName: "Full Name",
+            email: "Email Address",
+            step2: "Step 2:",
+            chooseTheme: "Choose Your Research Theme",
+            loadingTopics: "Loading topic availability...",
+            registerNow: "Register Now",
+            noChangeWarning: "Once registered, you cannot change your topic. Choose wisely!",
+            registering: "Registering...",
+            checking: "Checking...",
+            found: "Found!",
+            topic: "Topic",
+            team: "Team",
+            project: "Project",
+            notRegistered: "Not registered yet. Please fill the form below.",
+            errorChecking: "Error checking status. Try again.",
+            networkError: "Network error. Please check your connection and try again.",
+            registrationFailed: "Registration failed. Please try again.",
+            furtherInstructions: "You will receive further instructions via email.",
+            locked: "Locked",
+            failedLoad: "Failed to load. Please refresh the page."
+        },
+        fr: {
+            subtitle: "Portail d'Inscription aux Projets IA",
+            alreadyRegistered: "Déjà inscrit(e) ?",
+            checkAssignment: "Vérifiez votre affectation :",
+            enterMatricule: "Entrez votre Matricule",
+            checkStatus: "Vérifier le Statut",
+            youAreRegistered: "Vous êtes déjà inscrit(e) !",
+            balancingRule: "Règle d'Équilibrage :",
+            balancingRuleDesc: "Pour assurer des groupes équilibrés, certains thèmes peuvent être temporairement verrouillés jusqu'à ce que les autres rattrapent.",
+            step1: "Étape 1 :",
+            yourDetails: "Vos Informations",
+            fullName: "Nom Complet",
+            email: "Adresse Email",
+            step2: "Étape 2 :",
+            chooseTheme: "Choisissez Votre Thème de Recherche",
+            loadingTopics: "Chargement des thèmes disponibles...",
+            registerNow: "S'inscrire Maintenant",
+            noChangeWarning: "Une fois inscrit(e), vous ne pouvez plus changer de thème. Choisissez bien !",
+            registering: "Inscription en cours...",
+            checking: "Vérification...",
+            found: "Trouvé !",
+            topic: "Thème",
+            team: "Équipe",
+            project: "Projet",
+            notRegistered: "Pas encore inscrit(e). Veuillez remplir le formulaire ci-dessous.",
+            errorChecking: "Erreur lors de la vérification. Réessayez.",
+            networkError: "Erreur réseau. Veuillez vérifier votre connexion et réessayer.",
+            registrationFailed: "L'inscription a échoué. Veuillez réessayer.",
+            furtherInstructions: "Vous recevrez des instructions supplémentaires par email.",
+            locked: "Verrouillé",
+            failedLoad: "Échec du chargement. Veuillez actualiser la page."
+        }
+    };
+
+    let currentLang = 'en';
+
     const topics = [
-        { id: "Group_01_Computer_Vision", title: "Computer Vision", icon: "👁️", desc: "Pothole Detection, Cocoa Counting, Disease Classification" },
-        { id: "Group_02_NLP", title: "NLP & Linguistics", icon: "🗣️", desc: "Pidgin Translation, Yemba Autocorrect, Dschang Chatbot" },
-        { id: "Group_03_Time_Series", title: "Time Series", icon: "📈", desc: "Market Forecasting, Electricity Prediction, Student Success" },
-        { id: "Group_04_Audio_Processing", title: "Audio & Speech", icon: "🎙️", desc: "Dialect Spotting, Logging Detection, Cameroonian ASR" },
-        { id: "Group_05_Agentic_AI", title: "Agentic AI", icon: "🤖", desc: "MoMo Agent, Penal Code Assistant, Tour Guide" },
-        { id: "Group_06_MLOps", title: "MLOps", icon: "⚙️", desc: "Feature Store, Experiment Tracker, Data Validator" }
+        { id: "Group_01_Computer_Vision", title: { en: "Computer Vision", fr: "Vision par Ordinateur" }, icon: "👁️", 
+          desc: { en: "Pothole Detection, Cocoa Counting, Disease Classification", fr: "Détection de Nids-de-Poule, Comptage Cacao, Classification Maladies" }},
+        { id: "Group_02_NLP", title: { en: "NLP & Linguistics", fr: "TAL & Linguistique" }, icon: "🗣️", 
+          desc: { en: "Pidgin Translation, Yemba Autocorrect, Dschang Chatbot", fr: "Traduction Pidgin, Autocorrection Yemba, Chatbot Dschang" }},
+        { id: "Group_03_Time_Series", title: { en: "Time Series", fr: "Séries Temporelles" }, icon: "📈", 
+          desc: { en: "Market Forecasting, Electricity Prediction, Student Success", fr: "Prévision Marchés, Prédiction Électricité, Réussite Étudiante" }},
+        { id: "Group_04_Audio_Processing", title: { en: "Audio & Speech", fr: "Audio & Parole" }, icon: "🎙️", 
+          desc: { en: "Dialect Spotting, Logging Detection, Cameroonian ASR", fr: "Détection Dialecte, Détection Exploitation Forestière, ASR Camerounais" }},
+        { id: "Group_05_Agentic_AI", title: { en: "Agentic AI", fr: "IA Agentique" }, icon: "🤖", 
+          desc: { en: "MoMo Agent, Penal Code Assistant, Tour Guide", fr: "Agent MoMo, Assistant Code Pénal, Guide Touristique" }},
+        { id: "Group_06_MLOps", title: { en: "MLOps", fr: "MLOps" }, icon: "⚙️", 
+          desc: { en: "Feature Store, Experiment Tracker, Data Validator", fr: "Feature Store, Suivi d'Expériences, Validateur de Données" }}
     ];
+
+    // =============================================
+    // LANGUAGE SWITCHER
+    // =============================================
+    function setLanguage(lang) {
+        currentLang = lang;
+        
+        // Update button states
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.lang-btn[onclick="setLanguage('${lang}')"]`).classList.add('active');
+        
+        // Update all translatable elements
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang][key]) {
+                el.textContent = translations[lang][key];
+            }
+        });
+        
+        // Update placeholders
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (translations[lang][key]) {
+                el.placeholder = translations[lang][key];
+            }
+        });
+        
+        // Re-render topics with new language
+        if (window.lastAvailability) {
+            renderTopics(window.lastAvailability);
+        }
+    }
 
     // =============================================
     // LOAD AVAILABILITY FROM GOOGLE SHEETS
@@ -178,12 +310,13 @@
         try {
             const response = await fetch(APPS_SCRIPT_URL);
             const availability = await response.json();
+            window.lastAvailability = availability;
             renderTopics(availability);
             document.getElementById('loadingText').style.display = 'none';
         } catch (e) {
             console.error("Error loading availability:", e);
             document.getElementById('loadingText').innerHTML = 
-                '<span class="text-danger">Failed to load. Please refresh the page.</span>';
+                `<span class="text-danger">${translations[currentLang].failedLoad}</span>`;
         }
     }
 
@@ -202,10 +335,10 @@
                      data-topic-id="${t.id}"
                      onclick="${isAvailable ? `selectTopic('${t.id}', this)` : 'void(0)'}">
                     <div class="card-body text-center position-relative">
-                        ${!isAvailable ? '<span class="badge bg-warning text-dark status-badge">Locked</span>' : ''}
+                        ${!isAvailable ? `<span class="badge bg-warning text-dark status-badge">${translations[currentLang].locked}</span>` : ''}
                         <div class="topic-icon mb-2">${t.icon}</div>
-                        <h5 class="card-title">${t.title}</h5>
-                        <p class="card-text small text-muted">${t.desc}</p>
+                        <h5 class="card-title">${t.title[currentLang]}</h5>
+                        <p class="card-text small text-muted">${t.desc[currentLang]}</p>
                     </div>
                 </div>
             `;
@@ -226,12 +359,12 @@
     document.getElementById('checkStatusBtn').addEventListener('click', async function() {
         const matricule = document.getElementById('checkMatricule').value.trim();
         if (!matricule) {
-            alert("Please enter your Matricule.");
+            alert(currentLang === 'en' ? "Please enter your Matricule." : "Veuillez entrer votre Matricule.");
             return;
         }
 
         const resultDiv = document.getElementById('statusResult');
-        resultDiv.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Checking...';
+        resultDiv.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${translations[currentLang].checking}`;
 
         try {
             const response = await fetch(`${APPS_SCRIPT_URL}?action=checkStatus&matricule=${encodeURIComponent(matricule)}`);
@@ -240,17 +373,17 @@
             if (data.registered) {
                 resultDiv.innerHTML = `
                     <div class="alert alert-success">
-                        <strong>Found!</strong> ${data.name}<br>
-                        <strong>Topic:</strong> ${data.topic}<br>
-                        <strong>Team:</strong> ${data.team}<br>
-                        <strong>Project:</strong> ${data.subProject}
+                        <strong>${translations[currentLang].found}</strong> ${data.name}<br>
+                        <strong>${translations[currentLang].topic}:</strong> ${data.topic}<br>
+                        <strong>${translations[currentLang].team}:</strong> ${data.team}<br>
+                        <strong>${translations[currentLang].project}:</strong> ${data.subProject}
                     </div>
                 `;
             } else {
-                resultDiv.innerHTML = `<div class="alert alert-secondary">Not registered yet. Please fill the form below.</div>`;
+                resultDiv.innerHTML = `<div class="alert alert-secondary">${translations[currentLang].notRegistered}</div>`;
             }
         } catch (e) {
-            resultDiv.innerHTML = `<div class="alert alert-danger">Error checking status. Try again.</div>`;
+            resultDiv.innerHTML = `<div class="alert alert-danger">${translations[currentLang].errorChecking}</div>`;
         }
     });
 
@@ -265,7 +398,7 @@
         errorAlert.style.display = 'none';
         
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Registering...';
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${translations[currentLang].registering}`;
         
         const formData = new FormData(this);
         const data = Object.fromEntries(formData);
@@ -280,25 +413,23 @@
             const result = await response.json();
 
             if (result.result === "success") {
-                // Show success view
                 document.getElementById('registrationFormContainer').style.display = 'none';
                 document.getElementById('alreadyRegisteredView').style.display = 'block';
                 document.getElementById('registrationDetails').innerHTML = `
                     <p class="h5">${result.message}</p>
-                    <p class="mt-3">You will receive further instructions via email.</p>
+                    <p class="mt-3">${translations[currentLang].furtherInstructions}</p>
                 `;
             } else {
-                // Show error
-                errorAlert.textContent = result.message || "Registration failed. Please try again.";
+                errorAlert.textContent = result.message || translations[currentLang].registrationFailed;
                 errorAlert.style.display = 'block';
                 btn.disabled = false;
-                btn.innerHTML = 'Register Now';
+                btn.innerHTML = translations[currentLang].registerNow;
             }
         } catch (e) {
-            errorAlert.textContent = "Network error. Please check your connection and try again.";
+            errorAlert.textContent = translations[currentLang].networkError;
             errorAlert.style.display = 'block';
             btn.disabled = false;
-            btn.innerHTML = 'Register Now';
+            btn.innerHTML = translations[currentLang].registerNow;
         }
     });
 
